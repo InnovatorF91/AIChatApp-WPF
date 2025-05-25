@@ -1,4 +1,4 @@
-﻿using OpenAI.Images;
+﻿using System;
 using System.IO;
 using System.Windows.Media.Imaging;
 
@@ -12,24 +12,14 @@ namespace CreateAndEditImageApp.Services
 		/// <summary>
 		/// OpenAIの画像生成クライアント
 		/// </summary>
-		private ImageClient imageClient; // Use ImageClient instead of OpenAIClient
-
-		/// <summary>
-		/// OpenAIの画像生成モデル
-		/// </summary>
-		private readonly string model = "gpt-image-1"; // Default model
-
-		/// <summary>
-		/// OpenAIのAPIキー
-		/// </summary>
-		private readonly string apiKey = "Your OpenAI API key"; // Your OpenAI API key
+		private readonly IImageClientWrapper _client;
 
 		/// <summary>
 		/// OpenaiImageServiceのコンストラクタ
 		/// </summary>
-		public OpenaiImageService()
+		public OpenaiImageService(IImageClientWrapper client)
 		{
-			imageClient = new ImageClient(model, apiKey); // Initialize ImageClient
+			_client = client;
 		}
 
 		/// <summary>
@@ -39,21 +29,17 @@ namespace CreateAndEditImageApp.Services
 		/// <returns>BitmapImage</returns>
 		public async Task<BitmapImage?> GenerateImageAsync(string prompt) // Fix: Use nullable BitmapImage
 		{
-			var result = await imageClient.GenerateImageAsync(prompt);
+			// 指定されたプロンプトに基づいて画像を生成するメソッドを呼び出します。
+			var bytes = await _client.GenerateImageAsync(prompt);
 
-			if (result?.Value?.ImageBytes != null && result.Value.ImageBytes.ToArray().Length > 0) // Fix: Use ToArray() to access the byte array
+			// 生成された画像データがnullでない場合、BitmapImageを作成して返します。
+			if (bytes != null && bytes.ToArray().Length > 0)
 			{
-				using var ms = new MemoryStream(result.Value.ImageBytes.ToArray()); // Fix: Convert BinaryData to byte array
-				var image = new BitmapImage();
-				image.BeginInit();
-				image.CacheOption = BitmapCacheOption.OnLoad;
-				image.StreamSource = ms;
-				image.EndInit();
-				image.Freeze();
-				return image;
+				return _client.Convert(bytes.ToArray());
 			}
 
-			return null; // Fix: Explicitly return null for nullable BitmapImage
+			// 生成された画像データがnullまたは空の場合、nullを返します。
+			return null;
 		}
 	}
 

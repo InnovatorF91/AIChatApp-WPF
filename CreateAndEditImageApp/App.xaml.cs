@@ -3,7 +3,6 @@ using CreateAndEditImageApp.Services;
 using CreateAndEditImageApp.ViewModels;
 using CreateAndEditImageApp.Views;
 using System.Windows;
-using System.Windows.Controls;
 
 namespace CreateAndEditImageApp
 {
@@ -28,13 +27,12 @@ namespace CreateAndEditImageApp
 		protected override void RegisterTypes(IContainerRegistry containerRegistry)
 		{
 			containerRegistry.RegisterSingleton<IAppHostService, AppHostService>();
+			containerRegistry.RegisterSingleton<IOpenaiImageService, OpenaiImageService>();
+			containerRegistry.RegisterSingleton<IImageClientWrapper, ImageClientWrapper>();
 
 			// 這裡註冊你的依賴關係
 			containerRegistry.RegisterForNavigation<MainView, MainViewModel>();
 			containerRegistry.RegisterForNavigation<CreateAndEditImageView, CreateAndEditImageViewModel>();
-
-			// 註冊服務
-			containerRegistry.RegisterInstance<IOpenaiImageService>(new OpenaiImageService());
 		}
 	}
 }
