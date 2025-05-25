@@ -41,23 +41,23 @@ cd AIChatApp-WPF
 dotnet restore
 ```
 ### 3. OpenAI API キーの設定
-**OpenaiImageService.cs の apiKey パラメータに、OpenAI の API キーを直接設定してください。
+OpenaiImageService.cs の apiKey パラメータに、OpenAI の API キーを直接設定してください。<br>
 ```bash
 private readonly string apiKey = "あなたの OpenAI API キー";
 ```
-- ※ 今後 appsettings.json や環境変数への移行も検討中です。
+※ 今後 appsettings.json や環境変数への移行も検討中です。<br>
 
 ### 4. アプリを実行
-- Visual Studio で CreateAndEditImageApp.sln を開き、F5 キーで実行。
+Visual Studio で CreateAndEditImageApp.sln を開き、F5 キーで実行。<br>
 
 ## 🚀  テスト実行方法
-- CreateAndEditImageAppTests プロジェクトには、以下の単体テストが含まれています：
+CreateAndEditImageAppTests プロジェクトには、以下の単体テストが含まれています：<br>
 ```bash
 dotnet test
 ```
-- InputCommand の動作確認
-- OpenAI サービス呼び出し検証
-- UI 操作（Scroll・Capture・Shutdown 等）のモックテスト
+InputCommand の動作確認<br>
+OpenAI サービス呼び出し検証<br>
+UI 操作（Scroll・Capture・Shutdown 等）のモックテスト<br>
 
 ## 📁 プロジェクト構成
 ```bash
@@ -72,22 +72,27 @@ AIChatApp-WPF/
 └── README.md                      # このファイル
 ```
 
-## 🤝 貢献について
-- Pull Request や Issue は大歓迎です！
-- 1. このリポジトリをフォーク
-- 2. ブランチを作成：git checkout -b feature/新機能名
-- 3. コミット：git commit -m '機能追加'
-- 4. プッシュ：git push origin feature/新機能名
-- 5. プルリクエストを作成
+### 🧡 貢献について
 
-## 🗂 今後の予定
-- このプロジェクトには、今後以下のような新機能の追加を予定しています：
-- チャット履歴の保存
-- 複数画像生成モードの追加
-- 入力履歴の自動補完
-- API エラー時のリトライ機構
-- ぜひ ⭐️ Star を付けて、アップデートをお見逃しなく！
+Pull Request や Issue は大歓迎です！<br>
+i. このリポジトリをフォーク<br>
+ii. ブランチを作成：`git checkout -b feature/新機能名`<br>
+iii. コミット：`git commit -m '機能追加'`<br>
+iv. プッシュ：`git push origin feature/新機能名`<br>
+v. プルリクエストを作成<br>
 
-## 📄 ライセンス
-- 本リポジトリは MIT ライセンス の下で公開されています。
-- 商用・非商用を問わず、自由にご利用いただけます。
+
+### 📅 今後の予定
+
+このプロジェクトには、今後以下のような新機能の追加を予定しています：<br>
+・チャット履歴の保存<br>
+・複数画像生成モードの追加<br>
+・入力履歴の自動補完<br>
+・API エラー時のリトライ機構<br>
+ぜひ ⭐️ Star を付けて、アップデートをお見逃しなく！<br>
+
+
+### 📄 ライセンス
+
+本リポジトリは MIT ライセンスの下で公開されています。<br>
+商用・非商用を問わず、自由にご利用いただけます。<br>
