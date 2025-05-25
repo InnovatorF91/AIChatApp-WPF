@@ -41,7 +41,7 @@ cd AIChatApp-WPF
 dotnet restore
 ```
 ### 3. OpenAI API キーの設定
-OpenaiImageService.cs の apiKey パラメータに、OpenAI の API キーを直接設定してください。<br>
+ImageClientWrapper.cs の apiKey パラメータに、OpenAI の API キーを直接設定してください。<br>
 ```bash
 private readonly string apiKey = "あなたの OpenAI API キー";
 ```
