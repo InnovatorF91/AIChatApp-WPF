@@ -1,11 +1,9 @@
 ﻿using CreateAndEditImageApp.Common;
 using CreateAndEditImageApp.Models;
-using CreateAndEditImageApp.Services;
+using CreateAndEditImageApp.Repositories;
 using System.Collections.ObjectModel;
+using System.IO;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Input;
-using System.Windows.Media;
 using System.Windows.Media.Imaging;
 
 namespace CreateAndEditImageApp.ViewModels
@@ -36,9 +34,9 @@ namespace CreateAndEditImageApp.ViewModels
 		private string imageName = $"image_{DateTime.Now:yyyyMMdd_HHmmss}.png";
 
 		/// <summary>
-		/// OpenAIサービス
+		/// サーバーとの通信を行うOpenAIの画像生成サービス
 		/// </summary>
-		private readonly IOpenaiImageService _openaiService;
+		private readonly IOpenaiImageRepository _openaiRepository;
 
 		/// <summary>
 		/// マウスダウンフラグ
@@ -48,7 +46,7 @@ namespace CreateAndEditImageApp.ViewModels
 		/// <summary>
 		/// マウスの開始位置
 		/// </summary>
-		private Point mouseStartPoint;
+		private System.Windows.Point mouseStartPoint;
 
 		/// <summary>
 		/// スクロール開始位置
@@ -227,34 +225,37 @@ namespace CreateAndEditImageApp.ViewModels
 		public ObservableCollection<ChatMessageModel> ChatMessages { get; private set; }
 
 		/// <summary>
-		/// CreateAndEditImageViewModel constructor
+		/// 生成された画像を格納するプロパティ
+		/// </summary>
+		public BitmapImage MyImage { get; set; } // Store the generated image
+
+		/// <summary>
+		/// CreateAndEditImageViewModelのコンストラクタ
 		/// </summary>
 		/// <param name="regionManager">regionManager</param>
-		public CreateAndEditImageViewModel(IRegionManager regionManager,IAppHostService appHostService ,IOpenaiImageService openaiService) : base(regionManager, appHostService)
+		/// <param name="appHostService">appHostService</param>
+		/// <param name="repository">openaiRepository</param>
+		public CreateAndEditImageViewModel(IRegionManager regionManager, IAppHostService appHostService, IOpenaiImageRepository repository)
+		   : base(regionManager, appHostService)
 		{
-			_openaiService = openaiService;
+			_openaiRepository = repository;
 
 			// Initialize commands
 			InputTextGotFocus = new DelegateCommand(GotFocus);
-
 			InputTextLostFocus = new DelegateCommand(LostFocus);
-
 			InputCommand = new DelegateCommand<UIElement>(OnInputAsync);
-
 			ReturnCommand = new DelegateCommand(OnReturn);
-
 			ChatMessages = new ObservableCollection<ChatMessageModel>();
-
 			ChatMessagesMouseDown = new DelegateCommand<UIElement>(OnChatMessagesMouseDown);
-
 			ChatMessagesMouseUp = new DelegateCommand<UIElement>(OnChatMessagesMouseUp);
-
 			ChatMessagesMouseMove = new DelegateCommand<UIElement>(OnChatMessagesMouseMove);
-
 			ScrollViewerLoaded = new DelegateCommand<UIElement>(OnScrollViewerLoaded);
 
 			// Initialize the default input text style
 			Initalize();
+
+			// Ensure 'MyImage' is initialized to a default value
+			MyImage = new BitmapImage();
 		}
 
 		/// <summary>
@@ -265,7 +266,7 @@ namespace CreateAndEditImageApp.ViewModels
 			SetDefaultInputTextStyle();
 
 			// test
-			ChatMessages.Add(new ChatMessageModel(_regionManager, base._appHostService) { Text = "Hello, this is a test message.", PopColor = Brushes.LightBlue, TextAlignment = TextAlignment.Left, TextForeground = Brushes.White, HasText = true, HasImage = false });
+			ChatMessages.Add(new ChatMessageModel(_regionManager, base._appHostService) { Text = "Hello, this is a test message.", PopColor = System.Windows.Media.Brushes.LightBlue, TextAlignment = TextAlignment.Left, TextForeground = System.Windows.Media.Brushes.White, HasText = true, HasImage = false });
 			// Add a test message
 
 
@@ -279,9 +280,9 @@ namespace CreateAndEditImageApp.ViewModels
 			{
 				Text = "Hello,this is a test image.",
 				Image = new BitmapImage(new Uri(imagePath, UriKind.Absolute)),
-				PopColor = Brushes.LightBlue,
+				PopColor = System.Windows.Media.Brushes.LightBlue,
 				TextAlignment = TextAlignment.Left,
-				TextForeground = Brushes.White,
+				TextForeground = System.Windows.Media.Brushes.White,
 				HasText = true,
 				HasImage = true
 			});
@@ -326,9 +327,9 @@ namespace CreateAndEditImageApp.ViewModels
 			ChatMessages.Add(new ChatMessageModel(_regionManager, base._appHostService)
 			{
 				Text = InputText,
-			    PopColor = Brushes.LightGreen, 
+			    PopColor = System.Windows.Media.Brushes.LightGreen, 
 				TextAlignment = TextAlignment.Right, 
-				TextForeground = Brushes.Black,
+				TextForeground = System.Windows.Media.Brushes.Black,
 				HasText = true,
 				HasImage = false }); // Add the input text as a message
 
@@ -339,21 +340,29 @@ namespace CreateAndEditImageApp.ViewModels
 
 			try
 			{
-				var bitmap = await _openaiService.GenerateImageAsync(inputText);
-
-				if (bitmap != null)
+				// Generate the image using the OpenAI repository
+				string? base64 = await _openaiRepository.GetImageBase64Async(inputText);
+				if (base64 != null)
 				{
+					// Convert the base64 string to a BitmapImage
+					var image = ConvertBase64ToBitmapImage(base64);
+					MyImage = image; // Store the generated image
+				}
+
+				if (MyImage != null)
+				{
+					// Create a new ChatMessageModel with the generated image
 					ChatMessages.Add(new ChatMessageModel(_regionManager, base._appHostService)
 					{
-						Image = bitmap,
-						PopColor = Brushes.LightBlue,
+						Image = MyImage,
+						PopColor = System.Windows.Media.Brushes.LightBlue,
 						TextAlignment = TextAlignment.Left,
-						TextForeground = Brushes.White,
+						TextForeground = System.Windows.Media.Brushes.White,
 						HasText = false,
 						HasImage = true
 					});
 
-					_appHostService.SaveImageBytesAsFile(bitmap, saveImageFolderPath, imageName); // Save the generated image to a file
+					_appHostService.SaveImageBytesAsFile(MyImage, saveImageFolderPath, imageName); // Save the generated image to a file
 				}
 			}
 			catch (Exception ex)
@@ -434,7 +443,7 @@ namespace CreateAndEditImageApp.ViewModels
 		{
 			if (isMouseDown && element != null)
 			{
-				Point current = _appHostService.GetMousePosition(element);
+				System.Windows.Point current = _appHostService.GetMousePosition(element);
 				double delta = mouseStartPoint.Y - current.Y;
 				_appHostService.ScrollToVerticalOffset(element, startOffset + delta);
 			}
@@ -479,6 +488,24 @@ namespace CreateAndEditImageApp.ViewModels
 				// Scroll to the end of the ScrollViewer when it is loaded
 				_appHostService.ScrollToEnd(element);
 			}
+		}
+
+		/// <summary>
+		/// Base64文字列をBitmapImageに変換するメソッド
+		/// </summary>
+		/// <param name="base64">Base64文字列</param>
+		/// <returns>BitmapImage</returns>
+		private BitmapImage ConvertBase64ToBitmapImage(string base64)
+		{
+			var imageData = Convert.FromBase64String(base64.Replace("data:image/png;base64,", ""));
+			using var ms = new MemoryStream(imageData);
+			var image = new BitmapImage();
+			image.BeginInit();
+			image.CacheOption = BitmapCacheOption.OnLoad;
+			image.StreamSource = ms;
+			image.EndInit();
+			image.Freeze();
+			return image;
 		}
 	}
 }

@@ -1,9 +1,9 @@
 ﻿using Moq;
 using CreateAndEditImageApp.ViewModels;
-using CreateAndEditImageApp.Services;
 using CreateAndEditImageApp.Common;
 using System.Windows.Media.Imaging;
 using System.Windows;
+using CreateAndEditImageApp.Repositories;
 
 namespace CreateAndEditImageAppTests
 {
@@ -22,10 +22,7 @@ namespace CreateAndEditImageAppTests
 		/// </summary>
 		private readonly Mock<IAppHostService> _appHostServiceMock;
 
-		/// <summary>
-		/// OpenaiImageServiceのモック
-		/// </summary>
-		private readonly Mock<IOpenaiImageService> _openaiServiceMock;
+		private readonly Mock<IOpenaiImageRepository> _openaiImageRepositoryMock;
 
 		/// <summary>
 		/// CreateAndEditImageViewModelTestsのコンストラクタ
@@ -34,7 +31,7 @@ namespace CreateAndEditImageAppTests
 		{
 			_regionManagerMock = new Mock<IRegionManager>();
 			_appHostServiceMock = new Mock<IAppHostService>();
-			_openaiServiceMock = new Mock<IOpenaiImageService>();
+			_openaiImageRepositoryMock = new Mock<IOpenaiImageRepository>();
 		}
 
 		/// <summary>
@@ -47,7 +44,7 @@ namespace CreateAndEditImageAppTests
 			var vm = new CreateAndEditImageViewModel(
 				_regionManagerMock.Object,
 				_appHostServiceMock.Object,
-				_openaiServiceMock.Object);
+				_openaiImageRepositoryMock.Object);
 
 			// Assert
 			Assert.NotNull(vm.InputTextGotFocus);
@@ -68,7 +65,7 @@ namespace CreateAndEditImageAppTests
 			var vm = new CreateAndEditImageViewModel(
 				_regionManagerMock.Object,
 				_appHostServiceMock.Object,
-				_openaiServiceMock.Object);
+				_openaiImageRepositoryMock.Object);
 
 			vm.InputText = "Please enter your message here...";
 
@@ -91,7 +88,7 @@ namespace CreateAndEditImageAppTests
 			var vm = new CreateAndEditImageViewModel(
 				_regionManagerMock.Object,
 				_appHostServiceMock.Object,
-				_openaiServiceMock.Object);
+				_openaiImageRepositoryMock.Object);
 
 			vm.InputText = "";
 
@@ -112,14 +109,17 @@ namespace CreateAndEditImageAppTests
 		{
 			// Arrange
 			var vm = new CreateAndEditImageViewModel(
-			_regionManagerMock.Object,
-			_appHostServiceMock.Object,
-			_openaiServiceMock.Object);
+				_regionManagerMock.Object,
+				_appHostServiceMock.Object,
+				_openaiImageRepositoryMock.Object);
 
 			vm.InputText = "Hello world";
 			var bitmap = new BitmapImage();
-			_openaiServiceMock.Setup(s => s.GenerateImageAsync("Hello world"))
-			.ReturnsAsync(bitmap);
+
+			// Fix: Ensure the correct type is used for ReturnsAsync
+			_openaiImageRepositoryMock
+				.Setup(s => s.GetImageBase64Async("Hello world"))
+				.ReturnsAsync((string?)null); // Adjusted to match the expected return type of Task<string?>
 
 			// Create a mock UIElement to pass as the parameter
 			var mockUIElement = new Mock<UIElement>().Object;
@@ -129,7 +129,7 @@ namespace CreateAndEditImageAppTests
 
 			// Assert
 			Assert.Contains(vm.ChatMessages, m => m.Text == "Hello world");
-			_openaiServiceMock.Verify(s => s.GenerateImageAsync("Hello world"), Times.Once);
+			_openaiImageRepositoryMock.Verify(s => s.GetImageBase64Async("Hello world"), Times.Once);
 		}
 
 		/// <summary>
@@ -142,7 +142,7 @@ namespace CreateAndEditImageAppTests
 			var vm = new CreateAndEditImageViewModel(
 				_regionManagerMock.Object,
 				_appHostServiceMock.Object,
-				_openaiServiceMock.Object);
+				_openaiImageRepositoryMock.Object);
 
 			// Act
 			vm.ReturnCommand.Execute();
@@ -160,7 +160,7 @@ namespace CreateAndEditImageAppTests
 			var vm = new CreateAndEditImageViewModel(
 				_regionManagerMock.Object,
 				_appHostServiceMock.Object,
-				_openaiServiceMock.Object);
+				_openaiImageRepositoryMock.Object);
 
 			var element = new UIElement();
 			var expectedPoint = new Point(10, 20);
@@ -206,7 +206,7 @@ namespace CreateAndEditImageAppTests
 			var vm = new CreateAndEditImageViewModel(
 				_regionManagerMock.Object,
 				_appHostServiceMock.Object,
-				_openaiServiceMock.Object);
+				_openaiImageRepositoryMock.Object);
 
 			var element = new UIElement();
 
@@ -235,7 +235,7 @@ namespace CreateAndEditImageAppTests
 			var vm = new CreateAndEditImageViewModel(
 				_regionManagerMock.Object,
 				_appHostServiceMock.Object,
-				_openaiServiceMock.Object);
+				_openaiImageRepositoryMock.Object);
 
 			var element = new UIElement();
 
@@ -268,7 +268,7 @@ namespace CreateAndEditImageAppTests
 			var vm = new CreateAndEditImageViewModel(
 				_regionManagerMock.Object,
 				_appHostServiceMock.Object,
-				_openaiServiceMock.Object);
+				_openaiImageRepositoryMock.Object);
 
 			var element = new UIElement();
 

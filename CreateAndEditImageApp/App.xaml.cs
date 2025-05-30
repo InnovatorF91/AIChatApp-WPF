@@ -1,5 +1,5 @@
 ﻿using CreateAndEditImageApp.Common;
-using CreateAndEditImageApp.Services;
+using CreateAndEditImageApp.Repositories;
 using CreateAndEditImageApp.ViewModels;
 using CreateAndEditImageApp.Views;
 using System.Windows;
@@ -26,9 +26,9 @@ namespace CreateAndEditImageApp
 
 		protected override void RegisterTypes(IContainerRegistry containerRegistry)
 		{
+			// 註冊服務
 			containerRegistry.RegisterSingleton<IAppHostService, AppHostService>();
-			containerRegistry.RegisterSingleton<IOpenaiImageService, OpenaiImageService>();
-			containerRegistry.RegisterSingleton<IImageClientWrapper, ImageClientWrapper>();
+			containerRegistry.RegisterSingleton<IOpenaiImageRepository, OpenaiImageRepository>();
 
 			// 這裡註冊你的依賴關係
 			containerRegistry.RegisterForNavigation<MainView, MainViewModel>();
