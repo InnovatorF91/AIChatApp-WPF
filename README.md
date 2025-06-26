@@ -40,14 +40,8 @@ cd AIChatApp-WPF
 ```bash
 dotnet restore
 ```
-### 3. OpenAI API キーの設定
-ImageClientWrapper.cs の apiKey パラメータに、OpenAI の API キーを直接設定してください。<br>
-```bash
-private readonly string apiKey = "あなたの OpenAI API キー";
-```
-※ 今後 appsettings.json や環境変数への移行も検討中です。<br>
 
-### 4. アプリを実行
+### 3. アプリを実行
 Visual Studio で CreateAndEditImageApp.sln を開き、F5 キーで実行。<br>
 
 ## 🚀  テスト実行方法
@@ -130,7 +124,12 @@ https://localhost:7110/api/OpenaiImage/GetImage
 ```csharp
 await _httpClient.PostAsJsonAsync("/api/OpenaiImage/GetImage", new { prompt });
 ```
-
+#### 4. OpenAI API キーの設定
+OpenaiImageService.cs の apiKey パラメータに、OpenAI の API キーを直接設定してください。<br>
+```bash
+private readonly string apiKey = "あなたの OpenAI API キー";
+```
+※ 今後 appsettings.json や環境変数への移行も検討中です。<br>
 ---
 
 ## 🧪 サーバー側の単体テスト
